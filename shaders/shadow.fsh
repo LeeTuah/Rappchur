@@ -1,5 +1,10 @@
 #version 330 compatibility
 
+#ifndef MC_VERSION
+#extension GL_GOOGLE_include_directive : require
+#endif
+#include "/lib/distort.glsl"
+
 uniform sampler2D gtexture;
 
 in vec2 texcoord;
