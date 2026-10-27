@@ -1,4 +1,4 @@
-const int shadowMapResolution = 2048;
+const int shadowMapResolution = 2048; // [256 512 1024 2048 4096 8192]
 const float shadowDistanceRenderMul = 1.0;
 
 const bool shadowtex0Nearest = true;

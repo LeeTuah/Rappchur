@@ -27,6 +27,8 @@ uniform vec3 shadowLightPosition; // returns the position of the sun/moon
 uniform float viewWidth;
 uniform float viewHeight;
 
+uniform int worldTime;
+
 in vec2 texcoord;
 
 /* RENDERTARGETS: 0 */
@@ -38,12 +40,15 @@ const int colortex0Format = RGB16;
 
 // constants
 
-# define SHADOW_RADIUS 1
-# define SHADOW_RANGE 4
+#define ENABLE_SOFT_SHADOWS // [true false]
+
+#define SHADOW_RADIUS 1 // [1 2 3 4 5 6 7 8 9 10]
+#define SHADOW_RANGE 4 // [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]
 
 const vec3 ambient_const = vec3(0.1);
 const vec3 skylight_const = vec3(0.05, 0.15, 0.30);
 const vec3 blocklight_const = vec3(1.0, 0.5, 0.08);
+
 const vec3 sun_light_const = vec3(1.0);
 const vec3 moon_light_const = vec3(0.003);
 
@@ -118,25 +123,30 @@ void main() {
 
 	vec3 shadow_view_pos = (shadowModelView * vec4(feet_player_pos, 1.0)).xyz;
 	vec4 shadow_clip_pos = shadowProjection * vec4(shadow_view_pos, 1.0);
-	
-	// moved to get_soft_shadow(), so not needed
-	// shadow_clip_pos.z -= 0.001; // to prevent shadow acne
-	// shadow_clip_pos.xyz = distort_shadow_clip_pos(shadow_clip_pos.xyz);
-	// vec3 shadow_ndc_pos = shadow_clip_pos.xyz / shadow_clip_pos.w;
-	// vec3 shadow_screen_pos = shadow_ndc_pos * 0.5 + 0.5;
+	vec3 shadow = vec3(0.0);	
 
-	// checks whether the depth of the current texture (from the sun) is less than or equal to 
-	// the shadow map texture provided by iris
-	// if equal, shadow = 1 (same depth), else depth of current texture < shadowmap, shadow = 0
-	vec3 shadow = get_soft_shadow(shadow_clip_pos);
+	#ifdef ENABLE_SOFT_SHADOWS
+		shadow = get_soft_shadow(shadow_clip_pos);
+	#else
+		shadow_clip_pos.z -= 0.001; // to prevent shadow acne
+		shadow_clip_pos.xyz = distort_shadow_clip_pos(shadow_clip_pos.xyz);
+		vec3 shadow_ndc_pos = shadow_clip_pos.xyz / shadow_clip_pos.w;
+		vec3 shadow_screen_pos = shadow_ndc_pos * 0.5 + 0.5;
+
+		shadow = get_shadow(shadow_screen_pos);
+	#endif
 
 	vec3 sunlight_vector = normalize(shadowLightPosition);
 	sunlight_vector = mat3(gbufferModelViewInverse) * sunlight_vector;
 
+	vec3 sun_const = vec3(0.0);
+	if (worldTime < 12000) sun_const = sun_light_const;
+	else sun_const = moon_light_const;
+
 	vec3 ambient_light = ambient_const;
 	vec3 skylight = lightmap.y * skylight_const;
 	vec3 blocklight = lightmap.x * blocklight_const;
-	vec3 sun_moon_light = sun_light_const * shadow * clamp(dot(sunlight_vector, normal), 0.0, 1.0);
+	vec3 sun_moon_light = sun_const * shadow * clamp(dot(sunlight_vector, normal), 0.0, 1.0);
 
 	color.rgb *= (ambient_light + skylight + blocklight + sun_moon_light);
 	// color.rgb = texture(noisetex, texcoord).rgb;
