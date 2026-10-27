@@ -42,7 +42,7 @@ const int colortex0Format = RGB16;
 
 #define ENABLE_SOFT_SHADOWS // [true false]
 
-#define SHADOW_RADIUS 1 // [1 2 3 4 5 6 7 8 9 10]
+#define SHADOW_RADIUS 1 // [1 2 3]
 #define SHADOW_RANGE 4 // [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]
 
 const vec3 ambient_const = vec3(0.1);

@@ -1,0 +1,6 @@
+option.ENABLE_SOFT_SHADOWS = Soft Shadows
+option.SHADOW_RADIUS = Shadow Radius
+option.SHADOW_RANGE = Shadow Range
+option.shadowMapResolution = Shadow Map Resolution
+
+screen.Soft_Shadow_Settings = Soft Shadow Settings
